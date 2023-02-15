@@ -172,9 +172,11 @@ KERVER=$(make kernelversion)
                 zip -r "$ZIP" *
                 curl -sLo zipsigner-3.0.jar https://raw.githubusercontent.com/Hunter-commits/AnyKernel/master/zipsigner-3.0.jar
                 java -jar zipsigner-3.0.jar "$ZIP".zip "$ZIP"-signed.zip
-		echo -e "$green Uploading... \n $red"
-		curl -sL https://git.io/file-transfer | sh && ./transfer "$ZIP".zip
-		echo -e "$red Uploaded!! \n $white"
+                echo -e "$green Uploading... \n $red"
+                curl -sL https://git.io/file-transfer | sh && ./transfer "$ZIP".zip
+                echo -e "$red Uploaded!! \n $white"
+                cd ..
+                rm -rf anykernel
                 rm -rf out
                 rm -rf testing.log
                 exit
