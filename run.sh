@@ -44,8 +44,8 @@ echo -e "$green << setup dirs >> \n $white"
 #
 # TOOLCHAIN = the toolchain u want to use "gcc/clang"
 echo -e "$green << cloning kernel >> \n $white"
-git clone https://github.com/Cykeek-Labs/kernel_realme_sdm710 sdm710
-cd sdm710
+git clone https://github.com/Cykeek-Labs/kernel_realme_sdm710 stable_sdm710
+cd stable_sdm710
 echo
 echo -e "$green << kernel cloned >> \n $white"
 
@@ -55,14 +55,14 @@ if [[ ! -d "$MY_DIR" ]]; then MY_DIR="$PWD"; fi
 
 DEVICE="Realme 3 Pro"
 CODENAME="RMX1851"
-KERNEL_NAME="MerakiKernel"
+KERNEL_NAME="Meraki"
 
 DEFCONFIG="lineageos_RMX1851_defconfig"
 
 AnyKernel="https://github.com/Cykeek-Labs/AnyKernel3.git"
 AnyKernelbranch="main"
 
-HOSST="Narikootam"
+HOSST="CykeekLabs"
 USEER="Cykeek"
 
 TOOLCHAIN="clang"
@@ -72,24 +72,24 @@ TOOLCHAIN="clang"
 # For regen the defconfig . use the regen.sh script
 
 if [ "$TOOLCHAIN" == gcc ]; then
-	if [ ! -d "$HOME/cykeek/gcc64" ] && [ ! -d "$HOME/cykeek/gcc32" ]
-	then
-		echo -e "$green << cloning gcc from arter >> \n $white"
-		git clone --depth=1 https://github.com/mvaisakh/gcc-arm64 "$HOME"/cykeek/gcc64
-		git clone --depth=1 https://github.com/mvaisakh/gcc-arm "$HOME"/cykeek/gcc32
-	fi
-	export PATH="$HOME/cykeek/gcc64/bin:$HOME/cykeek/gcc32/bin:$PATH"
-	export STRIP="$HOME/cykeek/gcc64/aarch64-elf/bin/strip"
-	export KBUILD_COMPILER_STRING=$("$HOME"/cykeek/gcc64/bin/aarch64-elf-gcc --version | head -n 1)
+        if [ ! -d "$HOME/cykeek/gcc64" ] && [ ! -d "$HOME/cykeek/gcc32" ]
+        then
+                echo -e "$green << cloning gcc from arter >> \n $white"
+                git clone --depth=1 https://github.com/mvaisakh/gcc-arm64 "$HOME"/cykeek/gcc64
+                git clone --depth=1 https://github.com/mvaisakh/gcc-arm "$HOME"/cykeek/gcc32
+        fi
+        export PATH="$HOME/cykeek/gcc64/bin:$HOME/cykeek/gcc32/bin:$PATH"
+        export STRIP="$HOME/cykeek/gcc64/aarch64-elf/bin/strip"
+        export KBUILD_COMPILER_STRING=$("$HOME"/cykeek/gcc64/bin/aarch64-elf-gcc --version | head -n 1)
 elif [ "$TOOLCHAIN" == clang ]; then
-	if [ ! -d "$HOME/cykeek/proton_clang" ]
-	then
-		echo -e "$green << cloning proton clang >> \n $white"
-		git clone --depth=1 https://github.com/kdrag0n/proton-clang.git "$HOME"/cykeek/proton_clang
-	fi
-	export PATH="$HOME/cykeek/proton_clang/bin:$PATH"
-	export STRIP="$HOME/cykeek/proton_clang/aarch64-linux-gnu/bin/strip"
-	export KBUILD_COMPILER_STRING=$("$HOME"/cykeek/proton_clang/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
+        if [ ! -d "$HOME/cykeek/playground_clang" ]
+        then
+                echo -e "$green << cloning playground clang >> \n $white"
+                git clone -b 17 --depth=1 https://gitlab.com/PixelOS-Devices/playgroundtc.git "$HOME"/cykeek/playground_clang
+        fi
+        export PATH="$HOME/cykeek/playground_clang/bin:$PATH"
+        export STRIP="$HOME/cykeek/playground_clang/aarch64-linux-gnu/bin/strip"
+        export KBUILD_COMPILER_STRING=$("$HOME"/cykeek/playground_clang/bin/clang --version | head -n 1 | perl -pe 's/\(http.*?\)//gs' | sed -e 's/  */ /g' -e 's/[[:space:]]*$//')
 fi
 
 # Setup build process
@@ -98,30 +98,31 @@ build_kernel() {
 Start=$(date +"%s")
 
 if [ "$TOOLCHAIN" == clang  ]; then
-	echo clang
-	make -j$(nproc --all) O=out \
+        echo clang
+        make -j$(nproc --all) O=out \
                               ARCH=arm64 \
-	                      CC="ccache clang" \
-	                      AR=llvm-ar \
-	                      NM=llvm-nm \
-	                      STRIP=llvm-strip \
-	                      OBJCOPY=llvm-objcopy \
-	                      OBJDUMP=llvm-objdump \
-	                      OBJSIZE=llvm-size \
-	                      READELF=llvm-readelf \
-	                      HOSTCC=clang \
-	                      HOSTCXX=clang++ \
-	                      HOSTAR=llvm-ar \
-	                      CROSS_COMPILE=aarch64-linux-gnu- \
-	                      CROSS_COMPILE_ARM32=arm-linux-gnueabi- \
-	                      CONFIG_DEBUG_SECTION_MISMATCH=y \
-	                      CONFIG_NO_ERROR_ON_MISMATCH=y   2>&1 | tee out/error.log
+                              CC=clang \
+                              AR=llvm-ar \
+                              NM=llvm-nm \
+                              LD=ld.lld \
+                              STRIP=llvm-strip \
+                              OBJCOPY=llvm-objcopy \
+                              OBJDUMP=llvm-objdump \
+                              OBJSIZE=llvm-size \
+                              READELF=llvm-readelf \
+                              HOSTCC=clang \
+                              HOSTCXX=clang++ \
+                              HOSTAR=llvm-ar \
+                              CROSS_COMPILE=aarch64-linux-gnu- \
+                              CROSS_COMPILE_ARM32=arm-linux-gnueabi- \
+                              CONFIG_DEBUG_SECTION_MISMATCH=y \
+                              CONFIG_NO_ERROR_ON_MISMATCH=y   2>&1 | tee out/error.log
 elif [ "$TOOLCHAIN" == gcc  ]; then
-	echo gcc
-	make -j$(nproc --all) O=out \
-			      ARCH=arm64 \
-			      CROSS_COMPILE=aarch64-elf- \
-			      CROSS_COMPILE_ARM32=arm-eabi- 2>&1 | tee out/error.log
+        echo gcc
+        make -j$(nproc --all) O=out \
+                              ARCH=arm64 \
+                              CROSS_COMPILE=aarch64-elf- \
+                              CROSS_COMPILE_ARM32=arm-eabi- 2>&1 | tee out/error.log
 fi
 
 End=$(date +"%s")
@@ -140,7 +141,13 @@ export HEADER_ARCH=arm64
 export KBUILD_BUILD_HOST="$HOSST"
 export KBUILD_BUILD_USER="$USEER"
 
-mkdir -p out
+mkdir -p out/
+echo -e "$green << Copying dts >> \n $white"
+mkdir -p out/arch/arm64/
+cp -r arch/arm64/boot out/arch/arm64/
+rm -rf out/arch/arm64/boot/dts/qcom
+mkdir -p out/arch/arm64/boot/dts/qcom/
+cp arch/arm64/boot/dts/qcom/*.dts* out/arch/arm64/boot/dts/qcom/
 
 make O=out clean && make O=out mrproper
 make "$DEFCONFIG" O=out
@@ -156,8 +163,10 @@ KERVER=$(make kernelversion)
                 echo -e "$green << Build completed in $(($Diff / 60)) minutes and $(($Diff % 60)) seconds >> \n $white"
         else
                 echo -e "$red << Failed to compile the kernel , Check up to find the error >>$white"
-		cat out/error.log | curl -F 'f:1=<-' ix.io
-		rm -rf testing.log
+                cat out/error.log | curl -F 'f:1=<-' ix.io
+                rm -rf testing.log
+                rm -rf anykernel/
+                rm -rf out/
                 exit 1
         fi
 
@@ -173,11 +182,11 @@ KERVER=$(make kernelversion)
                 curl -sLo zipsigner-3.0.jar https://raw.githubusercontent.com/Hunter-commits/AnyKernel/master/zipsigner-3.0.jar
                 java -jar zipsigner-3.0.jar "$ZIP".zip "$ZIP"-signed.zip
                 echo -e "$green Uploading... \n $red"
-                curl -sL https://git.io/file-transfer | sh && ./transfer "$ZIP".zip
+                # curl -sL https://git.io/file-transfer | sh && ./transfer "$ZIP".zip
+                curl -T "$ZIP".zip temp.sh
                 echo -e "$red Uploaded!! \n $white"
                 cd ..
-                rm -rf anykernel
-                rm -rf out
-                rm -rf testing.log
+                rm -rf anykernel/
+                rm -rf out/
                 exit
         fi
