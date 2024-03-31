@@ -7,6 +7,11 @@ Source='https://github.com/Cykeek/kernel_realme_sm8350'
 Branch='test'
 Folder='sm8350'
 
+# Initialize AnyKernel Repository
+Any_Source='https://github.com/Cykeek-Labs/AnyKernel3'
+Any_Branch='oplus'
+Any_Folder='anykernel'
+
 # Add Checks whether the defined folder is Available or not
 if [ -d $Folder ]; then
 	echo
@@ -42,9 +47,10 @@ refresh() {
 refresh
 
 # Configure kernel Workflow
+kernel_name='Meraki'
+device_name='porsche'
+zip_name="$kernel_name-14-$device_name-$(date +"%Y%m%d-%H%M").zip"
 Defconfig="vendor/lahaina-qgki_defconfig" # Define Stock Defconfig
-DTB_PATH="$Kernel_Dir/out/arch/arm64/boot/dts" # Define Stock DTBs paths
-DTBO_PATH="$Kernel_Dir/out/arch/arm64/boot" # Define Stock DTBOs paths
 IMG="$Kernel_Dir/out/arch/arm64/boot/Image" # Define Output Image format refer to arch/arm64/Makefile:"ifeq ($(CONFIG_BUILD_ARM64_KERNEL_COMPRESSION_GZIP),y)"
 
 # Generating .config (adapted from 'https://github.com/narikootam-dev/Kernel-Compile-Script/blob/sweet/regen.sh')
@@ -192,7 +198,7 @@ if [ ! -f "${directory}${filename}" ]; then
 	echo "File ${filename} not found. Downloading..."
 
     # Download the file from the URL and save it in the directory
-    curl -o "${directory}${filename}" -L "https://raw.githubusercontent.com/Cykeek/kernel_realme_sm8350/test/${directory}${filename}?token=GHSAT0AAAAAACQFO5UNYQ3BL5I2KVHNQNFUZQJI2ZA"	
+    curl -o "${directory}${filename}" -L "https://raw.githubusercontent.com/pjgowtham/android_kernel_oneplus_sm8350/lineage-21/drivers/input/touchscreen/oplus_touchscreen_v2/Focal/ft3681/FT3681_Pramboot_V1.3_20211109.i"	
 
 	echo "File downloaded and saved as ${directory}${filename}"
 else
@@ -205,7 +211,27 @@ if [ -f "$IMG" ]; then
 	echo -e "<< Build Completed in $(($Diff / 60)) minutes and $(($Diff % 60)) seconds >>"
 	sleep 1s
 	echo
-	echo "<< Clearing residuals >>"
+	# Clone AnyKernel
+	echo "<< Cloning AnyKernel >>"
+	git clone $Any_Source -b "${Any_Branch}" $Any_Folder
+	echo
+	echo "<< Anykernel Folder Cloned in $Kernel_Dir/$Any_Folder"
+	echo
+	# Let's Clone Our Output Image Into AnyKernel Folder
+	echo "<< Copying $IMG into $Any_Folder >>"
+	echo
+	cp -r "$IMG" $Any_Folder/
+	# Enter AnyKernel Folder
+	cd $Any_Folder
+	zip -r9 UPDATE-AnyKernel3.zip * -x README UPDATE-AnyKernel3.zip
+	mv UPDATE-AnyKernel3.zip $zip_name
+	echo "$zip_name CREATED SUCCESSFULLY"
+	echo
+	echo "Uploading"
+	pdup $zip_name
+	# Exit From AnyKernel
+	cd ../
+	echo "<< SUCCESS >>"
 else
 	echo -e "<< Error found !! >>"
 	exit 1
