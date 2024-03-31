@@ -232,6 +232,7 @@ if [ -f "$IMG" ]; then
 	# Exit From AnyKernel
 	cd ../
 	echo "<< SUCCESS >>"
+	refresh
 else
 	echo -e "<< Error found !! >>"
 	exit 1
