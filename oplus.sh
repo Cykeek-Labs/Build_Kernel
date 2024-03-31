@@ -113,6 +113,10 @@ fi
 
 # Build Kernel
 build_kernel(){
+
+	# Show Build Time
+	Start=$(date +"%s")
+
 	if [ "$Toolchain" = "clang" ]; then
 		make $Defconfig O=out
 		make -j$(nproc --all) O=out \
@@ -148,8 +152,6 @@ build_kernel(){
        	CROSS_COMPILE_ARM32=arm-eabi- 2>&1 | tee "$Kernel_Dir/out/error.log"
     fi
 
-	# Show Build Time
-	Start=$(date +"%s")
 	End=$(date +"%s")
 	Diff=$(($End - $Start))
 }
@@ -198,7 +200,6 @@ else
 fi
 
 build_kernel
-DATE=$(date +"%Y%m%d-%H%M%S")
 KERVER=$(make kernelversion)
 if [ -f "$IMG" ]; then
 	echo -e "<< Build Completed in $(($Diff / 60)) minutes and $(($Diff % 60)) seconds >>"
