@@ -41,20 +41,11 @@ refresh() {
 
 refresh
 
-# Configure Device Information
-Device_Name='Realme GT 2'
-Codename='porsche'
-Kernel_Ver='5.4'
-Chipset='sm8350'
-Manufacturer='Realme'
-echo -e "<< Device Name is $Device_Name and Kernel Version is $Kernel_Ver >>"
-echo
-
 # Configure kernel Workflow
-Defconfig="vendor/lahaina-qgki_defconfig"
-DTB_PATH="$Kernel_Dir/out/arch/arm64/boot/dts"
-DTBO_PATH="$Kernel_Dir/out/arch/arm64/boot"
-IMG="$Kernel_Dir/out/arch/arm64/boot/Image"
+Defconfig="vendor/lahaina-qgki_defconfig" # Define Stock Defconfig
+DTB_PATH="$Kernel_Dir/out/arch/arm64/boot/dts" # Define Stock DTBs paths
+DTBO_PATH="$Kernel_Dir/out/arch/arm64/boot" # Define Stock DTBOs paths
+IMG="$Kernel_Dir/out/arch/arm64/boot/Image" # Define Output Image format refer to arch/arm64/Makefile:"ifeq ($(CONFIG_BUILD_ARM64_KERNEL_COMPRESSION_GZIP),y)"
 
 # Generating .config (adapted from 'https://github.com/narikootam-dev/Kernel-Compile-Script/blob/sweet/regen.sh')
 generate_config(){
@@ -121,7 +112,6 @@ elif [ "$Toolchain" = "gcc" ]; then
 fi
 
 # Build Kernel
-# Slightly adapted output folder logic to https://github.com/sonyxperiadev/kernel-defconfig/commit/e5b44198aced841129e2c351e869d47b1a34a7ad
 build_kernel(){
 	if [ "$Toolchain" = "clang" ]; then
 		generate_config
@@ -191,6 +181,7 @@ fi
 # Execute kernel Build Action
 echo "<< Kernel Compiling Started!! >>"
 echo
+make O=out clean && make O=out mrproper
 build_kernel || error=true
 DATE=$(date +"%Y%m%d-%H%M%S")
 KERVER=$(make kernelversion)
@@ -203,3 +194,9 @@ else
 	echo -e "<< Error found !! >>"
 	exit 1
 fi	
+
+# Authorships:
+# 1. TogoFire
+# 1. KanishkTheDerp
+# 1. MarijnS95
+# 1. jerpelea
