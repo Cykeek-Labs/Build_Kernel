@@ -6,7 +6,6 @@
 Source='https://github.com/Cykeek/kernel_realme_sm8350'
 Branch='test'
 Folder='sm8350'
-echo -e "<< Repository Has Successfully Been Cloned in $Folder >>"
 
 # Add Checks whether the defined folder is Available or not
 if [ -d $Folder ]; then
@@ -18,6 +17,7 @@ if [ -d $Folder ]; then
 	echo "<< You're now in $PWD >>"
 	echo
 else
+	echo "<< $Folder is missing cloning repository >>"
 	git clone $Source -b "$Branch" $Folder
 	cd $Folder
 	echo "<< You're now in $PWD >>"
@@ -114,7 +114,6 @@ fi
 # Build Kernel
 build_kernel(){
 	if [ "$Toolchain" = "clang" ]; then
-		generate_config
 		make $Defconfig O=out
 		make -j$(nproc --all) O=out \
 		ARCH=arm64 \
@@ -181,8 +180,24 @@ fi
 # Execute kernel Build Action
 echo "<< Kernel Compiling Started!! >>"
 echo
-make O=out clean && make O=out mrproper
-build_kernel || error=true
+generate_config
+make mrproper
+
+# Do some drivers checks
+directory="drivers/input/touchscreen/oplus_touchscreen_v2/Focal/ft3681/"
+filename="FT3681_Pramboot_V1.3_20211109.i"
+if [ ! -f "${directory}${filename}" ]; then
+	echo "File ${filename} not found. Downloading..."
+
+    # Download the file from the URL and save it in the directory
+    curl -o "${directory}${filename}" -L "https://raw.githubusercontent.com/Cykeek/kernel_realme_sm8350/test/${directory}${filename}?token=GHSAT0AAAAAACQFO5UNYQ3BL5I2KVHNQNFUZQJI2ZA"	
+
+	echo "File downloaded and saved as ${directory}${filename}"
+else
+    echo "File ${filename} already exists."
+fi
+
+build_kernel
 DATE=$(date +"%Y%m%d-%H%M%S")
 KERVER=$(make kernelversion)
 if [ -f "$IMG" ]; then
@@ -194,9 +209,3 @@ else
 	echo -e "<< Error found !! >>"
 	exit 1
 fi	
-
-# Authorships:
-# 1. TogoFire
-# 1. KanishkTheDerp
-# 1. MarijnS95
-# 1. jerpelea
