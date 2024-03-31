@@ -138,13 +138,13 @@ build_kernel(){
 		LLVM_IAS=1 \
 		LLVM=1 \
 		STRIP=llvm-strip \
-       	OBJCOPY=llvm-objcopy \
-       	OBJDUMP=llvm-objdump \
-       	OBJSIZE=llvm-size \
-       	READELF=llvm-readelf \
-       	HOSTCC=clang \
-       	HOSTCXX=clang++ \
-       	HOSTAR=llvm-ar \
+       		OBJCOPY=llvm-objcopy \
+       		OBJDUMP=llvm-objdump \
+       		OBJSIZE=llvm-size \
+       		READELF=llvm-readelf \
+       		HOSTCC=clang \
+       		HOSTCXX=clang++ \
+       		HOSTAR=llvm-ar \
 		HOSTLD=ld.lld \
 		KBUILD_BUILD_USER=$USER \
 		KBUILD_BUILD_HOST=$HOST \
@@ -153,10 +153,10 @@ build_kernel(){
    	elif [ "$Toolchain" = "gcc" ]; then
 		make $Defconfig O=out
 		make -j$(nproc --all) O=out \
-       	ARCH=arm64 \
-       	CROSS_COMPILE=aarch64-elf- \
-       	CROSS_COMPILE_ARM32=arm-eabi- 2>&1 | tee "$Kernel_Dir/out/error.log"
-    fi
+       		ARCH=arm64 \
+       		CROSS_COMPILE=aarch64-elf- \
+       		CROSS_COMPILE_ARM32=arm-eabi- 2>&1 | tee "$Kernel_Dir/out/error.log"
+    	fi
 
 	End=$(date +"%s")
 	Diff=$(($End - $Start))
@@ -196,10 +196,8 @@ directory="drivers/input/touchscreen/oplus_touchscreen_v2/Focal/ft3681/"
 filename="FT3681_Pramboot_V1.3_20211109.i"
 if [ ! -f "${directory}${filename}" ]; then
 	echo "File ${filename} not found. Downloading..."
-
-    # Download the file from the URL and save it in the directory
-    curl -o "${directory}${filename}" -L "https://raw.githubusercontent.com/pjgowtham/android_kernel_oneplus_sm8350/lineage-21/drivers/input/touchscreen/oplus_touchscreen_v2/Focal/ft3681/FT3681_Pramboot_V1.3_20211109.i"	
-
+    	# Download the file from the URL and save it in the directory
+    	curl -o "${directory}${filename}" -L "https://raw.githubusercontent.com/pjgowtham/android_kernel_oneplus_sm8350/lineage-21/drivers/input/touchscreen/oplus_touchscreen_v2/Focal/ft3681/FT3681_Pramboot_V1.3_20211109.i"
 	echo "File downloaded and saved as ${directory}${filename}"
 else
     echo "File ${filename} already exists."
