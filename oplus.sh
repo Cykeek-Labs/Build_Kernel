@@ -8,8 +8,8 @@ Branch='test'
 Folder='sm8350'
 
 # Initialize AnyKernel Repository
-Any_Source='https://github.com/Cykeek-Labs/AnyKernel3'
-Any_Branch='oplus'
+Any_Source='https://github.com/Cykeek-Labs/Anykernel3_sm8350'
+Any_Branch='porsche'
 Any_Folder='anykernel'
 
 # Add Checks whether the defined folder is Available or not
@@ -40,7 +40,7 @@ refresh() {
 	rm -rf .config
 	find "$Kernel_Dir" -type f -name "*.a.symversions" -delete # Remove every files named as '.a.symversions' from every directory in current directory recursively
 	find "$Kernel_Dir/arch/arm64/boot/dts/vendor/oplus/" -type f -name "*.dtbo" -delete # Remove every files named as '.dtbo' from every directory in current directory recursively
-	echo -e "<< Residuals Cleaned >>"
+	echo "<< Residuals Cleaned >>"
 	echo
 }
 
@@ -227,7 +227,7 @@ if [ -f "$IMG" ]; then
 	mv UPDATE-AnyKernel3.zip $zip_name
 	echo "$zip_name CREATED SUCCESSFULLY"
 	echo
-	echo "Uploading"
+	echo "Uploading to PixelDrain"
 	pdup $zip_name
 	# Exit From AnyKernel
 	cd ../
