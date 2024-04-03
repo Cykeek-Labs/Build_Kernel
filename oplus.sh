@@ -52,6 +52,7 @@ device_name='porsche'
 zip_name="$kernel_name-14-$device_name-$(date +"%Y%m%d-%H%M").zip"
 Defconfig="vendor/lahaina-qgki_defconfig" # Define Stock Defconfig
 IMG="$Kernel_Dir/out/arch/arm64/boot/Image" # Define Output Image format refer to arch/arm64/Makefile:"ifeq ($(CONFIG_BUILD_ARM64_KERNEL_COMPRESSION_GZIP),y)"
+DTB_PATH="$kernel_Dir/out/arch/arm64/boot/dts"
 
 # Generating .config (adapted from 'https://github.com/narikootam-dev/Kernel-Compile-Script/blob/sweet/regen.sh')
 generate_config(){
@@ -218,9 +219,10 @@ if [ -f "$IMG" ]; then
 	echo "<< Anykernel Folder Cloned in $Kernel_Dir/$Any_Folder"
 	echo
 	# Let's Clone Our Output Image Into AnyKernel Folder
-	echo "<< Copying $IMG into $Any_Folder >>"
+	echo "<< Copying $IMG and dtb into $Any_Folder >>"
 	echo
 	cp -r "$IMG" $Any_Folder/
+	find "$DTB_PATH"/vendor/*/* -name '*.dtb' -exec cat {} + > "$Any_Folder"/dtb
 	# Enter AnyKernel Folder
 	cd $Any_Folder
 	zip -r9 UPDATE-AnyKernel3.zip * -x README UPDATE-AnyKernel3.zip
