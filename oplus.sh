@@ -169,8 +169,8 @@ if [ -d "$Kernel_Dir/out" ]; then
 	echo "<< Cloning DTS files >>"
 	mkdir -p $Kernel_Dir/out/arch/arm64/
 	cp -r $Kernel_Dir/arch/arm64/boot/ $Kernel_Dir/out/arch/arm64/
-	mkdir -p $Kernel_Dir/out/arch/arm64/boot/dts/vendor
-	cp -r $Kernel_Dir/arch/arm64/boot/dts/vendor/* $Kernel_Dir/out/arch/arm64/boot/dts/vendor/
+	mkdir -p $Kernel_Dir/out/arch/arm64/boot/dts/vendor/oplus
+	cp -r $Kernel_Dir/arch/arm64/boot/dts/vendor/oplus/* $Kernel_Dir/out/arch/arm64/boot/dts/vendor/oplus/
 	echo "<< DTS Files Copied >>"
 else
 	echo "<< OUT Folder not found >>"
@@ -181,8 +181,9 @@ else
 	echo "<< Cloning DTS files >>"
 	mkdir -p $Kernel_Dir/out/arch/arm64/
 	cp -r $Kernel_Dir/arch/arm64/boot/ $Kernel_Dir/out/arch/arm64/
-	mkdir -p $Kernel_Dir/out/arch/arm64/boot/dts/vendor
-	cp -r $Kernel_Dir/arch/arm64/boot/dts/vendor/* $Kernel_Dir/out/arch/arm64/boot/dts/vendor/
+	rm -rf $Kernel_Dir/out/arch/arm64/boot/dts
+	mkdir -p $Kernel_Dir/out/arch/arm64/boot/dts/
+	cp -r $Kernel_Dir/arch/arm64/boot/dts/vendor $Kernel_Dir/out/arch/arm64/boot/dts/
 	echo "<< DTS Files Copied >>"
 fi
 
@@ -219,10 +220,10 @@ if [ -f "$IMG" ]; then
 	echo "<< Anykernel Folder Cloned in $Kernel_Dir/$Any_Folder"
 	echo
 	# Let's Clone Our Output Image Into AnyKernel Folder
-	echo "<< Copying $IMG and dtb into $Any_Folder >>"
+	echo "<< Copying image and dtb into $Any_Folder >>"
 	echo
 	cp -r "$IMG" $Any_Folder/
-	find "$DTB_PATH"/vendor/*/* -name '*.dtb' -exec cat {} + > "$Any_Folder"/dtb
+	find "out/arch/arm64/boot/dts/vendor/oplus/porsche/" -name '*.dtb' -exec cat {} + > "$Any_Folder"/dtb
 	# Enter AnyKernel Folder
 	cd $Any_Folder
 	zip -r9 UPDATE-AnyKernel3.zip * -x README UPDATE-AnyKernel3.zip
@@ -234,8 +235,7 @@ if [ -f "$IMG" ]; then
 	# Exit From AnyKernel
 	cd ../
 	echo "<< SUCCESS >>"
-	refresh
 else
-	echo -e "<< Error found !! >>"
+	echo "<< Error found !! >>"
 	exit 1
-fi	
+fi
