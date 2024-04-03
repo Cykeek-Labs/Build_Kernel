@@ -34,7 +34,6 @@ Kernel_Dir=$(pwd) # inside the kernel folder location is stored in kernel_Dir
 
 # Cleanup Some directories
 refresh() {
-	clear
 	rm -rf out/
 	rm -rf anykernel/
 	rm -rf .config
@@ -235,6 +234,7 @@ if [ -f "$IMG" ]; then
 	# Exit From AnyKernel
 	cd ../
 	echo "<< SUCCESS >>"
+	refresh
 else
 	echo "<< Error found !! >>"
 	exit 1
