@@ -51,7 +51,7 @@ device_name='porsche'
 zip_name="$kernel_name-14-$device_name-$(date +"%Y%m%d-%H%M").zip"
 Defconfig="vendor/lahaina-qgki_defconfig" # Define Stock Defconfig
 IMG="$Kernel_Dir/out/arch/arm64/boot/Image" # Define Output Image format refer to arch/arm64/Makefile:"ifeq ($(CONFIG_BUILD_ARM64_KERNEL_COMPRESSION_GZIP),y)"
-DTB_PATH="$kernel_Dir/out/arch/arm64/boot/dts"
+DTB="$kernel_Dir/out/arch/arm64/boot/dtb"
 
 # Generating .config (adapted from 'https://github.com/narikootam-dev/Kernel-Compile-Script/blob/sweet/regen.sh')
 generate_config(){
@@ -181,9 +181,18 @@ else
 	mkdir -p $Kernel_Dir/out/arch/arm64/
 	cp -r $Kernel_Dir/arch/arm64/boot/ $Kernel_Dir/out/arch/arm64/
 	rm -rf $Kernel_Dir/out/arch/arm64/boot/dts
-	mkdir -p $Kernel_Dir/out/arch/arm64/boot/dts/
+	echo
+
+	# Clone Specific DTS folders (Stock Kernel Files are available in vendor folder only!!)
+	mkdir -p $Kernel_Dir/out/arch/arm64/boot/dts
+
+	# Clone content of DTS folder in OUT folder
 	cp -r $Kernel_Dir/arch/arm64/boot/dts/vendor $Kernel_Dir/out/arch/arm64/boot/dts/
 	echo "<< DTS Files Copied >>"
+	echo
+
+	# Create a DTBs folder
+	mkdir -p $Kernel_Dir/out/arch/arm64/boot/dtb
 fi
 
 # Execute kernel Build Action
@@ -208,32 +217,47 @@ fi
 
 build_kernel
 KERVER=$(make kernelversion)
-if [ -f "$IMG" ]; then
+
+# After Kernel Execution gets completed needs to check for files
+# Clone DTB files in proper DTB folder
+find "out/arch/arm64/boot/dts/vendor/oplus/porsche/" -name '*.dtb' -exec cat {} + >out/arch/arm64/boot/dtb #(DTB folder already configured in OUT --line NO. 195)
+
+# More checks for IMGs & DTBs and clone into anykernel folder
+if [ -f "$IMG" ] && [ -f "$DTB" ]; then
 	echo -e "<< Build Completed in $(($Diff / 60)) minutes and $(($Diff % 60)) seconds >>"
 	sleep 1s
 	echo
+
 	# Clone AnyKernel
 	echo "<< Cloning AnyKernel >>"
 	git clone $Any_Source -b "${Any_Branch}" $Any_Folder
 	echo
 	echo "<< Anykernel Folder Cloned in $Kernel_Dir/$Any_Folder"
 	echo
-	# Let's Clone Our Output Image Into AnyKernel Folder
-	echo "<< Copying image and dtb into $Any_Folder >>"
+
+	# Let's Clone IMGs and DTBs Into AnyKernel Folder
+	echo "<< Copying Image and DTBs into $Any_Folder >>"
 	echo
 	cp -r "$IMG" $Any_Folder/
-	find "out/arch/arm64/boot/dts/vendor/oplus/porsche/" -name '*.dtb' -exec cat {} + > "$Any_Folder"/dtb
+	cp -r "$DTB" $Any_Folder/
+	echo
+
 	# Enter AnyKernel Folder
 	cd $Any_Folder
 	zip -r9 UPDATE-AnyKernel3.zip * -x README UPDATE-AnyKernel3.zip
 	mv UPDATE-AnyKernel3.zip $zip_name
 	echo "$zip_name CREATED SUCCESSFULLY"
 	echo
+
+	# Upload Zip Files to PixelDrain service
 	echo "Uploading to PixelDrain"
 	pdup $zip_name
+
 	# Exit From AnyKernel
 	cd ../
 	echo "<< SUCCESS >>"
+
+	# Cleanup
 	refresh
 else
 	echo "<< Error found !! >>"
